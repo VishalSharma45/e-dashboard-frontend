@@ -3,8 +3,10 @@ import { json, useNavigate } from "react-router-dom";
 
 const SignUp = () => {
     const [name, setName] = useState("");
-    const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -15,28 +17,40 @@ const SignUp = () => {
     });
 
     const collectData = async () => {
+        if (!name || !email || !password) {
+            setError(true);
+            return false;
+        }
+
         const payload = {
             name: name,
             email: email,
             password: password
         }
 
-        let result = await fetch("http://localhost:5500/register", {
-            method: "post",
-            body: JSON.stringify(payload),
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        });
+        try {
+            setLoading(true);
+            let result = await fetch("http://localhost:5500/register", {
+                method: "post",
+                body: JSON.stringify(payload),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
 
-        result = await result.json();
-        if (result) {
-            localStorage.setItem("user", JSON.stringify(result));
-            navigate('/');
+            result = await result.json();
+            if (result) {
+                localStorage.setItem("user", JSON.stringify(result.result));
+                localStorage.setItem("token", JSON.stringify(result.auth));
+                navigate('/');
+            }
+        } catch (error) {
+            console.log("error", error)
+        } finally {
+            setLoading(false);
         }
 
     }
-
     return (
         <div className="register">
             <div className="innerRegister">
@@ -48,6 +62,7 @@ const SignUp = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                 />
+                {error && !name && <span className='invalid-input'>Enter name</span>}
                 <input
                     className="inputBox"
                     type="email"
@@ -55,6 +70,7 @@ const SignUp = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                 />
+                {error && !email && <span className='invalid-input'>Enter email</span>}
                 <input
                     className="inputBox"
                     type="password"
@@ -62,10 +78,12 @@ const SignUp = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
+                {error && !password && <span className='invalid-input'>Enter password</span>}
                 <button
                     className="appButton"
                     type="button"
                     onClick={collectData}
+                    disabled={loading}
                 >
                     Sign Up
                 </button>

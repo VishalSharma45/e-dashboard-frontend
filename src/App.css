@@ -38,7 +38,8 @@
 
 .register,
 .login,
-.product {
+.product,
+.profile {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,12 +108,20 @@
   cursor: pointer;
 }
 
-.deleteBtn{
+.deleteBtn {
   background-color: red;
   margin-right: 10px;
 }
 
-.editBtn{
+.editBtn {
   background-color: green;
   margin-right: 10px;
+}
+
+.searchBox {
+  width: 50%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid skyblue;
+  border-radius: 10px;
 }

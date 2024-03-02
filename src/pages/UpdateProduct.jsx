@@ -1,52 +1,61 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-const AddProduct = () => {
+const UpdateProduct = () => {
+
+    const navigate = useNavigate();
+    const { id } = useParams();
     const [name, setName] = useState("");
     const [price, setPrice] = useState("");
     const [category, setCategory] = useState("");
     const [company, setCompany] = useState("");
-    const [error, setError] = useState(false);
 
-    const addProduct = async () => {
+    const getProduct = async () => {
+        let result = await fetch(`http://localhost:5500/product/${id}`, {
+            headers: {
+                "authorization": `Bearer ${JSON.parse(localStorage.getItem('token'))}`
+            }
+        });
+        result = await result.json();
 
-        if (!name || !price || !category || !company) {
-            setError(true);
-            return false;
-        }
+        setName(result.name);
+        setPrice(result.price);
+        setCategory(result.category);
+        setCompany(result.company);
+    }
 
-        const userId = JSON.parse(localStorage.getItem('user'))._id;
+    useEffect(() => {
+        getProduct();
+    }, [])
+
+    const updateProduct = async () => {
 
         const payload = {
             name: name,
             price: price,
             category: category,
-            company: company,
-            userId: userId
+            company: company
         }
 
-        let result = await fetch("http://localhost:5500/add-product", {
-            method: 'post',
+        let result = await fetch(`http://localhost:5500/update/${id}`, {
+            method: "put",
             body: JSON.stringify(payload),
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
                 "authorization": `Bearer ${JSON.parse(localStorage.getItem('token'))}`
             }
         });
-
         result = await result.json();
-        console.log(result);
-        toast.success("Added");
-
-        setName("")
-        setPrice("");
-        setCategory("");
-        setCompany("");
+        if (result) {
+            toast.success("Updated");
+            navigate("/");
+        }
     }
     return (
         <div className='product'>
             <div className="innerProduct">
-                <h1>Add Product</h1>
+                <h1>Update Product</h1>
                 <input
                     style={{ "marginBottom": "2px" }}
                     className="inputBox"
@@ -55,7 +64,7 @@ const AddProduct = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                 />
-                {error && !name && <span className='invalid-input'>Enter product name</span>}
+                {/* {error && !name && <span className='invalid-input'>Enter product name</span>} */}
                 <input
                     style={{ "marginBottom": "2px" }}
                     className="inputBox"
@@ -64,7 +73,7 @@ const AddProduct = () => {
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                 />
-                {error && !price && <span className='invalid-input'>Enter product price</span>}
+                {/* {error && !price && <span className='invalid-input'>Enter product price</span>} */}
                 <input
                     style={{ "marginBottom": "2px" }}
                     className="inputBox"
@@ -73,7 +82,7 @@ const AddProduct = () => {
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                 />
-                {error && !category && <span className='invalid-input'>Enter product category</span>}
+                {/* {error && !category && <span className='invalid-input'>Enter product category</span>} */}
                 <input
                     style={{ "marginBottom": "2px" }}
                     className="inputBox"
@@ -82,11 +91,11 @@ const AddProduct = () => {
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                 />
-                {error && !company && <span className='invalid-input'>Enter product company</span>}
-                <button onClick={addProduct} className='appButton' type='button'>Add Product</button>
+                {/* {error && !company && <span className='invalid-input'>Enter product company</span>} */}
+                <button onClick={updateProduct} className='appButton' type='button'>Update Product</button>
             </div>
         </div>
     )
 }
 
-export default AddProduct
+export default UpdateProduct
